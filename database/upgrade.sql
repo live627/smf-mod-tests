@@ -1,0 +1,2 @@
+-- Stub SQL: database/upgrade.sql
+-- Created for tests/fixtures/package-info.xml

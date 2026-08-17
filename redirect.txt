@@ -1,0 +1,1 @@
+Stub redirect file referenced in tests/fixtures/package-info.xml

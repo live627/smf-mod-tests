@@ -1,2 +1,3 @@
-# smf-mod-tests
-A generalzed tests suite for your SMF mods, runnable in PHPUnit.
+# Stub README
+
+This is a stub README created for tests/fixtures/package-info.xml

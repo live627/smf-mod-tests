@@ -1,0 +1,1 @@
+Stub UNINSTALL.txt referenced in tests/fixtures/package-info.xml
