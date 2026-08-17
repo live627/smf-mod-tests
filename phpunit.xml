@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="vendor/autoload.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd" cacheDirectory=".phpunit.cache" displayDetailsOnTestsThatTriggerWarnings="true" displayDetailsOnSkippedTests="true" displayDetailsOnTestsThatTriggerNotices="true" displayDetailsOnTestsThatTriggerDeprecations="true" displayDetailsOnTestsThatTriggerErrors="true">
+  <testsuites>
+    <testsuite name="My Test Suite">
+      <directory>./tests/</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">./src/</directory>
+    </include>
+  </source>
+  <php>
+    <env name="PHP_CS_FIXER_FAST_LINT_TEST_CASES" value="1"/>
+  </php>
+</phpunit>

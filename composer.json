@@ -1,0 +1,33 @@
+{
+    "name": "live627/smf-mod-tests",
+    "description": "A generalzed tests suite for your SMF mods, runnable in PHPUnit.",
+    "license": "unlicense",
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.52",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "live627/php-cs-fixer-custom-fixers": "dev-main",
+        "phpunit/phpunit": "^13.3"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/live627/php-cs-fixer-custom-fixers.git"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Live627\\ModTests\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        }
+    },
+    "scripts": {
+        "lint": "php-cs-fixer fix --dry-run --verbose --show-progress=dots",
+        "lint-fix": "php-cs-fixer fix --allow-risky yes --sequential"
+    }
+}

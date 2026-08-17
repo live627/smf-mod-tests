@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: none
+          tools: cs2pr
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-progress
+
+      - name: PHP-CS-Fixer (dry-run)
+        run: vendor/bin/php-cs-fixer fix --dry-run --allow-risky=yes --format=checkstyle | cs2pr
+
+      - uses: mheap/phpunit-matcher-action@v1
+
+      - name: Enable Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: xdebug
+
+      - name: PHPUnit
+        id: phpunit
+        run: |
+          vendor/bin/phpunit \
+            --coverage-clover coverage.clover.xml \
+            --coverage-text \
+            --log-teamcity teamcity.log
+
+      - name: Show TeamCity log
+        if: steps.phpunit.outcome == 'failure'
+        run: cat teamcity.log
+
+      - name: Upload Report to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: true

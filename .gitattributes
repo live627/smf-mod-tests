@@ -1,0 +1,13 @@
+# Exclude development tooling from GitHub Linguist language statistics.
+/.dev-tools/* -linguist-detectable
+
+# Exclude development-only files from release archives created by
+# `git archive` and GitHub source downloads.
+
+/.* export-ignore
+/tests/ export-ignore
+/phpunit.xml export-ignore
+
+# Normalize all text files to LF line endings in the repository and
+# when checked out.
+* text eol=lf
