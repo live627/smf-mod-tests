@@ -1,0 +1,463 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<!--
+	This fixture intentionally exercises the package-info.xml constructs
+	found in both the SMF package documentation and real-world packages.
+
+	It includes:
+	- package metadata
+	- version restrictions
+	- install / upgrade / uninstall actions
+	- readmes
+	- code
+	- database scripts
+	- hooks
+	- modifications
+	- create / require / move / remove operations
+	- redirects
+	- credits
+	- inline and file-based content
+	- reverse operations
+	- SMF path variables
+-->
+<package-info
+	xmlns="http://www.simplemachines.org/xml/package-info"
+	xmlns:smf="http://www.simplemachines.org/"
+>
+	<!-- Basic package metadata. -->
+	<id>test:PackageInfoFixture</id>
+	<name>Package Info Test Fixture</name>
+	<type>modification</type>
+	<version>2.5.0</version>
+
+	<!--
+		Installation supporting multiple individual versions and ranges.
+	-->
+	<install for="1.0-1.5,2.0,2.1-2.1.999">
+
+		<!-- Basic file readme. -->
+		<readme>README.md</readme>
+
+		<!--
+			Real-world readme attributes used by packages such as SimpleDesk.
+		-->
+		<readme
+			lang="en"
+			parsebbc="true"
+			type="file"
+		>
+			README.en.txt
+		</readme>
+
+		<!-- Inline readme content. -->
+		<readme type="inline">This is an inline readme.</readme>
+
+		<!-- PHP installation code. -->
+		<code>install.php</code>
+		<code type="file">install-file.php</code>
+		<code type="inline">
+			&lt;?php
+			echo 'Inline installation code';
+		</code>
+
+		<!-- Database installation scripts. -->
+		<database>install.sql</database>
+		<database type="file">database/install.sql</database>
+		<database type="inline">
+			CREATE TABLE test_package_info (id INT);
+		</database>
+
+		<!--
+			Hooks may specify only a function path or both a function and
+			source file.
+		-->
+		<hook
+			hook="integrate_pre_include"
+			function="$sourcedir/TestPackageInfo.php"
+		/>
+
+		<hook
+			hook="integrate_actions"
+			function="testPackageInfoActions"
+			file="$sourcedir/TestPackageInfo.php"
+			reverse="false"
+		/>
+
+		<!-- A realistic hook using an SMF source directory. -->
+		<hook
+			hook="integrate_admin_areas"
+			function="testPackageInfoAdmin"
+			file="$sourcedir/TestPackageInfoAdmin.php"
+		/>
+
+		<!--
+			Modifications can be file-based or inline and may specify
+			a format and reverse flag.
+		-->
+		<modification>install.xml</modification>
+
+		<modification type="file">
+			install-file.xml
+		</modification>
+
+		<modification
+			type="inline"
+			reverse="false"
+			format="xml"
+		>
+			&lt;modification&gt;
+				&lt;file name="Sources/Test.php"&gt;
+					&lt;operation&gt;
+						&lt;search&gt;old code&lt;/search&gt;
+						&lt;add&gt;new code&lt;/add&gt;
+					&lt;/operation&gt;
+				&lt;/file&gt;
+			&lt;/modification&gt;
+		</modification>
+
+		<modification
+			type="inline"
+			reverse="true"
+			format="boardmod"
+		>
+			&lt;modification&gt;
+				Inline BoardMod instructions.
+			&lt;/modification&gt;
+		</modification>
+
+		<!-- Create operations. -->
+		<create-dir
+			name="TestPackage"
+			destination="$sourcedir"
+		/>
+
+		<create-file
+			name="TestPackage.php"
+			destination="$sourcedir/TestPackage"
+		/>
+
+		<!--
+			require-dir / require-file can specify a package source using
+			the "from" attribute.
+		-->
+		<require-dir
+			from="Sources/TestPackage"
+			name="TestPackage"
+			destination="$sourcedir"
+		/>
+
+		<require-file
+			from="Sources/TestPackage.php"
+			name="TestPackage.php"
+			destination="$sourcedir"
+		/>
+
+		<!--
+			Real-world packages commonly install directories into theme,
+			language, image, and source locations.
+		-->
+		<require-dir
+			name="languages"
+			destination="$themes_dir/default/languages"
+		/>
+
+		<require-dir
+			name="templates"
+			destination="$themedir"
+		/>
+
+		<require-dir
+			name="images/testpackage"
+			destination="$themes_dir/default/images"
+		/>
+
+		<require-file
+			name="css/testpackage.css"
+			destination="$themedir/css"
+		/>
+
+		<require-file
+			name="scripts/testpackage.js"
+			destination="$themedir/scripts"
+		/>
+
+		<!-- Move operations. -->
+		<move-dir
+			from="$sourcedir"
+			name="OldTestPackage"
+			destination="$sourcedir"
+		/>
+
+		<move-file
+			from="$sourcedir"
+			name="OldTestPackage.php"
+			destination="$sourcedir"
+		/>
+
+		<!-- Remove operations. -->
+		<remove-dir name="$sourcedir/OldTestPackage" />
+		<remove-file name="$sourcedir/OldTestPackage.php" />
+
+		<!--
+			Redirects may contain inline content or reference a file.
+		-->
+		<redirect
+			url="$boardurl/index.php?action=test"
+			type="inline"
+			timeout="10"
+		>
+			Installation complete.
+		</redirect>
+
+		<redirect
+			url="$scripturl?action=test"
+			type="file"
+		>
+			redirect.txt
+		</redirect>
+
+		<!--
+			Real-world packages can provide licensing and copyright metadata.
+		-->
+		<credits
+			url="https://example.com/test-package"
+			license="BSD 3-Clause"
+			licenseurl="https://example.com/test-package/license.txt"
+			copyright="2020-2026"
+		>
+			Test Package
+		</credits>
+	</install>
+
+	<!--
+		Upgrade from several package versions to a newer version range.
+	-->
+	<upgrade
+		for="2.1.6-2.1.99"
+		from="2.1.0-2.1.3"
+	>
+		<!-- Real-world upgrade readme. -->
+		<readme
+			lang="en"
+			parsebbc="false"
+			type="file"
+		>
+			UPGRADE.txt
+		</readme>
+
+		<code type="file">upgrade.php</code>
+
+		<database type="file">
+			database/upgrade.sql
+		</database>
+
+		<!-- Upgrade-specific hook. -->
+		<hook
+			hook="integrate_pre_include"
+			function="testPackageInfoUpgrade"
+			file="$sourcedir/TestPackageInfo.php"
+		/>
+
+		<!-- Upgrade modification. -->
+		<modification
+			type="file"
+			reverse="false"
+			format="xml"
+		>
+			upgrade.xml
+		</modification>
+
+		<!-- Upgrade file operations. -->
+		<create-dir
+			name="UpgradeTest"
+			destination="$sourcedir"
+		/>
+
+		<create-file
+			name="UpgradeTest.php"
+			destination="$sourcedir/UpgradeTest"
+		/>
+
+		<require-dir
+			from="Sources/UpgradeTest"
+			name="UpgradeTest"
+			destination="$sourcedir"
+		/>
+
+		<require-file
+			from="Sources/UpgradeTest.php"
+			name="UpgradeTest.php"
+			destination="$sourcedir"
+		/>
+
+		<move-dir
+			from="$sourcedir"
+			name="OldUpgradeTest"
+			destination="$sourcedir"
+		/>
+
+		<move-file
+			from="$sourcedir"
+			name="OldUpgradeTest.php"
+			destination="$sourcedir"
+		/>
+
+		<remove-dir name="$sourcedir/OldUpgradeTest" />
+		<remove-file name="$sourcedir/OldUpgradeTest.php" />
+
+		<redirect
+			url="$boardurl/index.php?action=upgrade"
+		/>
+	</upgrade>
+
+	<!--
+		Another upgrade demonstrates the common SimpleDesk pattern of
+		installing several directories and files.
+	-->
+	<upgrade
+		from="2.1.4"
+		for="2.1.6-2.1.99"
+	>
+		<require-file
+			name="sd_source/SimpleDesk-AjaxHandler.php"
+			destination="$sourcedir/sd_source"
+		/>
+
+		<require-file
+			name="sd_source/SimpleDesk-Post.php"
+			destination="$sourcedir/sd_source"
+		/>
+
+		<require-dir
+			name="sd_language"
+			destination="$themes_dir/default/languages"
+		/>
+
+		<require-dir
+			name="sd_source"
+			destination="$sourcedir"
+		/>
+
+		<require-dir
+			name="sd_template"
+			destination="$themedir"
+		/>
+
+		<require-dir
+			name="images/simpledesk"
+			destination="$themes_dir/default/images"
+		/>
+
+		<require-file
+			name="css/helpdesk.css"
+			destination="$themedir/css"
+		/>
+
+		<require-file
+			name="scripts/helpdesk.js"
+			destination="$themedir/scripts"
+		/>
+	</upgrade>
+
+	<!--
+		Uninstallation reverses installed components.
+	-->
+	<uninstall for="1.0-2.0">
+
+		<readme type="file">UNINSTALL.txt</readme>
+
+		<code type="file">uninstall.php</code>
+
+		<database type="file">
+			database/uninstall.sql
+		</database>
+
+		<!--
+			Reverse hooks are represented using reverse="true".
+		-->
+		<hook
+			hook="integrate_actions"
+			function="testPackageInfoActions"
+			file="$sourcedir/TestPackageInfo.php"
+			reverse="true"
+		/>
+
+		<hook
+			hook="integrate_pre_include"
+			function="$sourcedir/TestPackageInfo.php"
+			reverse="true"
+		/>
+
+		<!-- Reverse the modification. -->
+		<modification
+			type="file"
+			reverse="true"
+			format="xml"
+		>
+			uninstall.xml
+		</modification>
+
+		<!-- Remove installed files and directories. -->
+		<remove-dir name="$sourcedir/TestPackage" />
+		<remove-file name="$sourcedir/TestPackage.php" />
+
+		<remove-dir name="$themes_dir/default/languages/TestPackage" />
+		<remove-dir name="$themes_dir/default/images/testpackage" />
+
+		<remove-file name="$themedir/css/testpackage.css" />
+		<remove-file name="$themedir/scripts/testpackage.js" />
+
+		<!-- Inline redirect content. -->
+		<redirect
+			url="$session_id"
+			type="inline"
+			timeout="0"
+		>
+			Uninstallation complete.
+		</redirect>
+	</uninstall>
+
+	<!--
+		XML modification reversal with multiple target versions.
+	-->
+	<uninstall for="1.0 Beta 5 Public, 1.0 Beta 5+">
+		<modification
+			format="xml"
+			type="file"
+			reverse="true"
+		>
+			install.xml
+		</modification>
+	</uninstall>
+
+	<!-- Fallback installation. -->
+	<install>
+		<modification type="file">install.xml</modification>
+	</install>
+
+	<!-- Fallback uninstallation. -->
+	<uninstall>
+		<modification
+			type="file"
+			reverse="true"
+		>
+			install.xml
+		</modification>
+	</uninstall>
+
+	<!-- Legacy upgrade example. -->
+	<upgrade from="1.0" for="1.0 RC1, 1.0 - 1.1">
+		<modification
+			type="file"
+			reverse="true"
+		>
+			changes-in-1.01.xml
+		</modification>
+
+		<require-file
+			name="Blarg.css"
+			destination="$themedir"
+		/>
+	</upgrade>
+
+</package-info>
