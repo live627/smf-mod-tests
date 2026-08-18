@@ -29,11 +29,7 @@ abstract class PackageInfoTestCase extends TestCase
 		$attributes = $xml->attributes();
 
 		foreach ($attributes as $name => $value) {
-			$this->assertContains(
-				$name,
-				['xmlns', 'smf'],
-				\sprintf('Unexpected root attribute "%s".', $name),
-			);
+			$this->assertContains($name, ['xmlns', 'smf'], \sprintf('Unexpected root attribute "%s".', $name));
 		}
 	}
 
@@ -43,18 +39,10 @@ abstract class PackageInfoTestCase extends TestCase
 		$xml = $this->doTest($filename);
 
 		foreach (['id', 'name', 'type', 'version'] as $element) {
-			$this->assertCount(
-				1,
-				$xml->{$element},
-				\sprintf('<%s> is required.', $element),
-			);
+			$this->assertCount(1, $xml->{$element}, \sprintf('<%s> is required.', $element));
 		}
 
-		$this->assertContains(
-			(string) $xml->type,
-			['avatar', 'language', 'modification'],
-			'<type> must be avatar, language, or modification.',
-		);
+		$this->assertContains((string) $xml->type, ['avatar', 'language', 'modification'], '<type> must be avatar, language, or modification.');
 
 		$this->assertNotSame('', trim((string) $xml->id));
 		$this->assertNotSame('', trim((string) $xml->name));
@@ -66,11 +54,7 @@ abstract class PackageInfoTestCase extends TestCase
 	{
 		$xml = $this->doTest($filename);
 
-		$this->assertMatchesRegularExpression(
-			'/^[^:]+:[^:]+$/',
-			(string) $xml->id,
-			'<id> should use the username:package-name format.',
-		);
+		$this->assertMatchesRegularExpression('/^[^:]+:[^:]+$/', (string) $xml->id, '<id> should use the username:package-name format.');
 	}
 
 	#[DataProvider('provideActionsCases')]
@@ -78,40 +62,30 @@ abstract class PackageInfoTestCase extends TestCase
 	{
 		$xml = $this->doTest($filename);
 
-		$this->assertGreaterThanOrEqual(
-			$action === 'upgrade' ? 0 : 1,
-			\count($xml->{$action}),
-			\sprintf('At least one <%s> element is required.', $action),
-		);
+		$this->assertGreaterThanOrEqual($action === 'upgrade' ? 0 : 1, \count($xml->{$action}), \sprintf('At least one <%s> element is required.', $action));
 
 		foreach ($xml->{$action} as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				$action === 'upgrade'
+			$this->assertAllowedAttributes($element, $action === 'upgrade'
 					? ['for', 'from']
-					: ['for'],
-			);
+					: ['for'], );
 
-			$this->assertAllowedChildren(
-				$element,
-				[
-					'readme',
-					'code',
-					'database',
-					'hook',
-					'modification',
-					'create-dir',
-					'create-file',
-					'require-dir',
-					'require-file',
-					'move-dir',
-					'move-file',
-					'remove-dir',
-					'remove-file',
-					'redirect',
-					'credits',
-				],
-			);
+			$this->assertAllowedChildren($element, [
+				'readme',
+				'code',
+				'database',
+				'hook',
+				'modification',
+				'create-dir',
+				'create-file',
+				'require-dir',
+				'require-file',
+				'move-dir',
+				'move-file',
+				'remove-dir',
+				'remove-file',
+				'redirect',
+				'credits',
+			], );
 
 			$this->validateActionChildren($element, \dirname($filename));
 		}
@@ -177,10 +151,7 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateReadmes(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->readme as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['lang', 'parsebbc', 'type'],
-			);
+			$this->assertAllowedAttributes($element, ['lang', 'parsebbc', 'type']);
 
 			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
 			$this->assertAttributeValues($element, 'parsebbc', ['true', 'false']);
@@ -191,10 +162,8 @@ abstract class PackageInfoTestCase extends TestCase
 		}
 	}
 
-	private function validateCode(
-		\SimpleXMLElement $action,
-		string $package_directory,
-	): void {
+	private function validateCode(\SimpleXMLElement $action, string $package_directory): void
+	{
 		foreach ($action->code as $element) {
 			$this->assertAllowedAttributes($element, ['type']);
 			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
@@ -220,15 +189,9 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateHooks(\SimpleXMLElement $action): void
 	{
 		foreach ($action->hook as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['hook', 'function', 'file', 'reverse'],
-			);
+			$this->assertAllowedAttributes($element, ['hook', 'function', 'file', 'reverse']);
 
-			$this->assertRequiredAttributes(
-				$element,
-				['hook', 'function'],
-			);
+			$this->assertRequiredAttributes($element, ['hook', 'function']);
 
 			$this->assertAttributeValues($element, 'reverse', ['true', 'false']);
 		}
@@ -237,10 +200,7 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateModifications(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->modification as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['type', 'reverse', 'format'],
-			);
+			$this->assertAllowedAttributes($element, ['type', 'reverse', 'format']);
 
 			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
 			$this->assertAttributeValues($element, 'reverse', ['true', 'false']);
@@ -248,8 +208,57 @@ abstract class PackageInfoTestCase extends TestCase
 
 			if ((string) ($element['type'] ?? 'file') === 'file') {
 				$this->assertFileExists($package_directory . '/' . trim((string) $element));
+
+				// Turn on internal error handling
+				$old = libxml_use_internal_errors(true);
+
+				$doc = new \DOMDocument();
+				$xml = file_get_contents($package_directory . '/' . trim((string) $element));
+				$result = $doc->loadXML($xml);
+
+				if ($result === false) {
+					$errors = libxml_get_errors();
+
+					foreach ($errors as $error) {
+						$this->assertEmpty($error, $this->display_xml_error($error, $xml));
+					}
+				}
+
+				// Clear and restore original error setting
+				libxml_clear_errors();
+				libxml_use_internal_errors($old);
 			}
 		}
+	}
+
+	private function display_xml_error($error, $xml)
+	{
+		$return  = $xml[$error->line - 1] . "\n";
+		$return .= str_repeat('-', $error->column) . "^\n";
+
+		switch ($error->level) {
+			case LIBXML_ERR_WARNING:
+				$return .= "Warning {$error->code}: ";
+				break;
+
+			case LIBXML_ERR_ERROR:
+				$return .= "Error {$error->code}: ";
+				break;
+
+			case LIBXML_ERR_FATAL:
+				$return .= "Fatal Error {$error->code}: ";
+				break;
+		}
+
+		$return .= trim($error->message) .
+				   "\n  Line: {$error->line}" .
+				   "\n  Column: {$error->column}";
+
+		if ($error->file) {
+			$return .= "\n  File: {$error->file}";
+		}
+
+		return "{$return}\n\n--------------------------------------------\n\n";
 	}
 
 	private function validateCreateDirectories(\SimpleXMLElement $action): void
@@ -271,74 +280,44 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateRequireDirectories(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->{'require-dir'} as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['from', 'name', 'destination'],
-			);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
 
-			$this->assertRequiredAttributes(
-				$element,
-				['name', 'destination'],
-			);
+			$this->assertRequiredAttributes($element, ['name', 'destination']);
 
 			$source = (string) ($element['from'] ?: $element['name']);
 
-			$this->assertDirectoryExists(
-				$package_directory . '/' . $source,
-				'<require-dir> references a directory that does not exist.',
-			);
+			$this->assertDirectoryExists($package_directory . '/' . $source, '<require-dir> references a directory that does not exist.');
 		}
 	}
 
 	private function validateRequireFiles(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->{'require-file'} as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['from', 'name', 'destination'],
-			);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
 
-			$this->assertRequiredAttributes(
-				$element,
-				['name', 'destination'],
-			);
+			$this->assertRequiredAttributes($element, ['name', 'destination']);
 
 			$source = (string) ($element['from'] ?: $element['name']);
 
-			$this->assertFileExists(
-				$package_directory . '/' . $source,
-				'<require-file> references a file that does not exist.',
-			);
+			$this->assertFileExists($package_directory . '/' . $source, '<require-file> references a file that does not exist.');
 		}
 	}
 
 	private function validateMoveDirectories(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'move-dir'} as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['from', 'name', 'destination'],
-			);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
 
-			$this->assertRequiredAttributes(
-				$element,
-				['from', 'name', 'destination'],
-			);
+			$this->assertRequiredAttributes($element, ['from', 'name', 'destination']);
 		}
 	}
 
 	private function validateMoveFiles(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'move-file'} as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['from', 'name', 'destination'],
-			);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
 
-			$this->assertRequiredAttributes(
-				$element,
-				['from', 'name', 'destination'],
-			);
+			$this->assertRequiredAttributes($element, ['from', 'name', 'destination']);
 		}
 	}
 
@@ -361,21 +340,14 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateRedirects(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->redirect as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				['url', 'type', 'timeout'],
-			);
+			$this->assertAllowedAttributes($element, ['url', 'type', 'timeout']);
 
 			$this->assertRequiredAttributes($element, ['url']);
 
 			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
 
 			if (isset($element['timeout'])) {
-				$this->assertMatchesRegularExpression(
-					'/^\d+$/',
-					(string) $element['timeout'],
-					'<redirect timeout> must be an integer.',
-				);
+				$this->assertMatchesRegularExpression('/^\d+$/', (string) $element['timeout'], '<redirect timeout> must be an integer.');
 			}
 
 			if ((string) ($element['type'] ?? 'file') === 'file') {
@@ -387,106 +359,51 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateCredits(\SimpleXMLElement $action): void
 	{
 		foreach ($action->credits as $element) {
-			$this->assertAllowedAttributes(
-				$element,
-				[
-					'url',
-					'license',
-					'licenseurl',
-					'copyright',
-				],
-			);
+			$this->assertAllowedAttributes($element, [
+				'url',
+				'license',
+				'licenseurl',
+				'copyright',
+			], );
 
-			$this->assertRequiredAttributes(
-				$element,
-				[
-					'url',
-					'license',
-					'licenseurl',
-					'copyright',
-				],
-			);
+			$this->assertRequiredAttributes($element, [
+				'url',
+				'license',
+				'licenseurl',
+				'copyright',
+			], );
 		}
 	}
 
-	private function assertAllowedAttributes(
-		\SimpleXMLElement $element,
-		array $allowed,
-	): void {
+	private function assertAllowedAttributes(\SimpleXMLElement $element, array $allowed): void
+	{
 		foreach ($element->attributes() as $name => $value) {
-			$this->assertContains(
-				$name,
-				$allowed,
-				\sprintf(
-					'Unexpected attribute "%s" on <%s>.',
-					$name,
-					$element->getName(),
-				),
-			);
+			$this->assertContains($name, $allowed, \sprintf('Unexpected attribute "%s" on <%s>.', $name, $element->getName()));
 		}
 	}
 
-	private function assertRequiredAttributes(
-		\SimpleXMLElement $element,
-		array $required,
-	): void {
+	private function assertRequiredAttributes(\SimpleXMLElement $element, array $required): void
+	{
 		foreach ($required as $attribute) {
-			$this->assertTrue(
-				isset($element[$attribute]),
-				\sprintf(
-					'Attribute "%s" is required on <%s>.',
-					$attribute,
-					$element->getName(),
-				),
-			);
+			$this->assertTrue(isset($element[$attribute]), \sprintf('Attribute "%s" is required on <%s>.', $attribute, $element->getName()));
 
-			$this->assertNotSame(
-				'',
-				trim((string) $element[$attribute]),
-				\sprintf(
-					'Attribute "%s" on <%s> cannot be empty.',
-					$attribute,
-					$element->getName(),
-				),
-			);
+			$this->assertNotSame('', trim((string) $element[$attribute]), \sprintf('Attribute "%s" on <%s> cannot be empty.', $attribute, $element->getName()));
 		}
 	}
 
-	private function assertAttributeValues(
-		\SimpleXMLElement $element,
-		string $attribute,
-		array $allowed,
-	): void {
+	private function assertAttributeValues(\SimpleXMLElement $element, string $attribute, array $allowed): void
+	{
 		if (!isset($element[$attribute])) {
 			return;
 		}
 
-		$this->assertContains(
-			(string) $element[$attribute],
-			$allowed,
-			\sprintf(
-				'Invalid value "%s" for attribute "%s" on <%s>.',
-				$element[$attribute],
-				$attribute,
-				$element->getName(),
-			),
-		);
+		$this->assertContains((string) $element[$attribute], $allowed, \sprintf('Invalid value "%s" for attribute "%s" on <%s>.', $element[$attribute], $attribute, $element->getName()));
 	}
 
-	private function assertAllowedChildren(
-		\SimpleXMLElement $element,
-		array $allowed,
-	): void {
+	private function assertAllowedChildren(\SimpleXMLElement $element, array $allowed): void
+	{
 		foreach ($element->children() as $child) {
-			$this->assertContains(
-				$child->getName(),
-				$allowed,
-				\sprintf(
-					'Unexpected <%s> element inside <%s>.',
-					$child->getName(),
-					$element->getName(),
-				),
-			);
+			$this->assertContains($child->getName(), $allowed, \sprintf('Unexpected <%s> element inside <%s>.', $child->getName(), $element->getName()));
 		}
 	}
 }

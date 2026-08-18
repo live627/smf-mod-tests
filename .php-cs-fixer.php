@@ -20,7 +20,7 @@ return (new PhpCsFixer\Config())
 
 		// PSR12 overrides.
 		'no_break_comment' => false,  // A bit buggy with comments.
-		'method_argument_space' => ['after_heredoc' => false, 'on_multiline' => 'ensure_single_line_for_single_argument'],
+		'method_argument_space' => ['after_heredoc' => false, 'on_multiline' => 'ensure_single_line'],
 
 		// Array notation.
 		'array_syntax' => ['syntax' => 'short'],
