@@ -100,11 +100,7 @@
 			install-file.xml
 		</modification>
 
-		<modification
-			type="inline"
-			reverse="false"
-			format="xml"
-		>
+		<modification type="inline">
 			&lt;modification&gt;
 				&lt;file name="Sources/Test.php"&gt;
 					&lt;operation&gt;
@@ -112,16 +108,6 @@
 						&lt;add&gt;new code&lt;/add&gt;
 					&lt;/operation&gt;
 				&lt;/file&gt;
-			&lt;/modification&gt;
-		</modification>
-
-		<modification
-			type="inline"
-			reverse="true"
-			format="boardmod"
-		>
-			&lt;modification&gt;
-				Inline BoardMod instructions.
 			&lt;/modification&gt;
 		</modification>
 
@@ -147,38 +133,9 @@
 		/>
 
 		<require-file
-			from="Sources/TestPackage.php"
+			from="Sources/TestPackage/TestPackage.php"
 			name="TestPackage.php"
 			destination="$sourcedir"
-		/>
-
-		<!--
-			Real-world packages commonly install directories into theme,
-			language, image, and source locations.
-		-->
-		<require-dir
-			name="languages"
-			destination="$themes_dir/default/languages"
-		/>
-
-		<require-dir
-			name="templates"
-			destination="$themedir"
-		/>
-
-		<require-dir
-			name="images/testpackage"
-			destination="$themes_dir/default/images"
-		/>
-
-		<require-file
-			name="css/testpackage.css"
-			destination="$themedir/css"
-		/>
-
-		<require-file
-			name="scripts/testpackage.js"
-			destination="$themedir/scripts"
 		/>
 
 		<!-- Move operations. -->
@@ -278,18 +235,6 @@
 			destination="$sourcedir/UpgradeTest"
 		/>
 
-		<require-dir
-			from="Sources/UpgradeTest"
-			name="UpgradeTest"
-			destination="$sourcedir"
-		/>
-
-		<require-file
-			from="Sources/UpgradeTest.php"
-			name="UpgradeTest.php"
-			destination="$sourcedir"
-		/>
-
 		<move-dir
 			from="$sourcedir"
 			name="OldUpgradeTest"
@@ -307,55 +252,6 @@
 
 		<redirect
 			url="$boardurl/index.php?action=upgrade"
-		/>
-	</upgrade>
-
-	<!--
-		Another upgrade demonstrates the common SimpleDesk pattern of
-		installing several directories and files.
-	-->
-	<upgrade
-		from="2.1.4"
-		for="2.1.6-2.1.99"
-	>
-		<require-file
-			name="sd_source/SimpleDesk-AjaxHandler.php"
-			destination="$sourcedir/sd_source"
-		/>
-
-		<require-file
-			name="sd_source/SimpleDesk-Post.php"
-			destination="$sourcedir/sd_source"
-		/>
-
-		<require-dir
-			name="sd_language"
-			destination="$themes_dir/default/languages"
-		/>
-
-		<require-dir
-			name="sd_source"
-			destination="$sourcedir"
-		/>
-
-		<require-dir
-			name="sd_template"
-			destination="$themedir"
-		/>
-
-		<require-dir
-			name="images/simpledesk"
-			destination="$themes_dir/default/images"
-		/>
-
-		<require-file
-			name="css/helpdesk.css"
-			destination="$themedir/css"
-		/>
-
-		<require-file
-			name="scripts/helpdesk.js"
-			destination="$themedir/scripts"
 		/>
 	</upgrade>
 

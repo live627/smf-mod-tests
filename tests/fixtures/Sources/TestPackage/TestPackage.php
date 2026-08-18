@@ -1,6 +1,5 @@
 <?php
-// Stub for Sources/TestPackage/TestPackage.php referenced in tests/fixtures/package-info.xml
 
-namespace TestPackage;
+// Stub for Sources/TestPackage.php referenced in tests/fixtures/package-info.xml
 
-// TestPackage class stub
+// Package-level source stub
