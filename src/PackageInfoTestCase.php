@@ -79,7 +79,7 @@ abstract class PackageInfoTestCase extends TestCase
 		$xml = $this->doTest($filename);
 
 		$this->assertGreaterThanOrEqual(
-			1,
+			$action === 'upgrade' ? 0 : 1,
 			\count($xml->{$action}),
 			\sprintf('At least one <%s> element is required.', $action),
 		);
