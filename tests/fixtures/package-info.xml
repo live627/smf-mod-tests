@@ -37,6 +37,8 @@
 
 		<!-- Basic file readme. -->
 		<readme>README.md</readme>
+		<requires id="username:package-name" />
+		<error />
 
 		<!--
 			Real-world readme attributes used by packages such as SimpleDesk.

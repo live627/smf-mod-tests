@@ -84,8 +84,11 @@ abstract class PackageInfoTestCase extends TestCase
 				'remove-dir',
 				'remove-file',
 				'redirect',
+				'license',
 				'credits',
-			], );
+				'requires',
+				'error',
+			]);
 
 			$this->validateActionChildren($element, \dirname($filename));
 		}
@@ -146,6 +149,9 @@ abstract class PackageInfoTestCase extends TestCase
 		$this->validateRemoveFiles($action);
 		$this->validateRedirects($action, $package_directory);
 		$this->validateCredits($action);
+		$this->validateLicense($action, $package_directory);
+		$this->validateRequires($action);
+		$this->validateErrors($action);
 	}
 
 	private function validateReadmes(\SimpleXMLElement $action, string $package_directory): void
@@ -189,10 +195,11 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateHooks(\SimpleXMLElement $action): void
 	{
 		foreach ($action->hook as $element) {
-			$this->assertAllowedAttributes($element, ['hook', 'function', 'file', 'reverse']);
+			$this->assertAllowedAttributes($element, ['hook', 'function', 'object', 'file', 'reverse']);
 
 			$this->assertRequiredAttributes($element, ['hook', 'function']);
 
+			$this->assertAttributeValues($element, 'object', ['true', 'false']);
 			$this->assertAttributeValues($element, 'reverse', ['true', 'false']);
 		}
 	}
@@ -204,7 +211,7 @@ abstract class PackageInfoTestCase extends TestCase
 
 			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
 			$this->assertAttributeValues($element, 'reverse', ['true', 'false']);
-			$this->assertAttributeValues($element, 'format', ['xml']);
+			$this->assertAttributeValues($element, 'format', ['xml', 'diff', 'boardmod']);
 
 			if ((string) ($element['type'] ?? 'file') === 'file') {
 				$this->assertFileExists($package_directory . '/' . trim((string) $element));
@@ -264,25 +271,31 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateCreateDirectories(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'create-dir'} as $element) {
-			$this->assertAllowedAttributes($element, ['name', 'destination']);
+			$this->assertAllowedAttributes($element, ['name', 'destination' ,  'error']);
 			$this->assertRequiredAttributes($element, ['name', 'destination']);
+
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 		}
 	}
 
 	private function validateCreateFiles(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'create-file'} as $element) {
-			$this->assertAllowedAttributes($element, ['name', 'destination']);
+			$this->assertAllowedAttributes($element, ['name', 'destination', 'error']);
 			$this->assertRequiredAttributes($element, ['name', 'destination']);
+
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 		}
 	}
 
 	private function validateRequireDirectories(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->{'require-dir'} as $element) {
-			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination', 'error']);
 
 			$this->assertRequiredAttributes($element, ['name', 'destination']);
+
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 
 			$source = (string) ($element['from'] ?: $element['name']);
 
@@ -293,9 +306,11 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateRequireFiles(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->{'require-file'} as $element) {
-			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination', 'error']);
 
 			$this->assertRequiredAttributes($element, ['name', 'destination']);
+
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 
 			$source = (string) ($element['from'] ?: $element['name']);
 
@@ -306,45 +321,52 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateMoveDirectories(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'move-dir'} as $element) {
-			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination', 'error']);
 
 			$this->assertRequiredAttributes($element, ['from', 'name', 'destination']);
+
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 		}
 	}
 
 	private function validateMoveFiles(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'move-file'} as $element) {
-			$this->assertAllowedAttributes($element, ['from', 'name', 'destination']);
+			$this->assertAllowedAttributes($element, ['from', 'name', 'destination', 'error']);
 
 			$this->assertRequiredAttributes($element, ['from', 'name', 'destination']);
+
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 		}
 	}
 
 	private function validateRemoveDirectories(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'remove-dir'} as $element) {
-			$this->assertAllowedAttributes($element, ['name']);
+			$this->assertAllowedAttributes($element, ['name', 'error']);
 			$this->assertRequiredAttributes($element, ['name']);
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 		}
 	}
 
 	private function validateRemoveFiles(\SimpleXMLElement $action): void
 	{
 		foreach ($action->{'remove-file'} as $element) {
-			$this->assertAllowedAttributes($element, ['name']);
+			$this->assertAllowedAttributes($element, ['name', 'error']);
 			$this->assertRequiredAttributes($element, ['name']);
+			$this->assertAttributeValues($element, 'error', ['fail', 'ignore']);
 		}
 	}
 
 	private function validateRedirects(\SimpleXMLElement $action, string $package_directory): void
 	{
 		foreach ($action->redirect as $element) {
-			$this->assertAllowedAttributes($element, ['url', 'type', 'timeout']);
+			$this->assertAllowedAttributes($element, ['url', 'type', 'parsebbc', 'timeout']);
 
 			$this->assertRequiredAttributes($element, ['url']);
 
 			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
+			$this->assertAttributeValues($element, 'parsebbc', ['true', 'false']);
 
 			if (isset($element['timeout'])) {
 				$this->assertMatchesRegularExpression('/^\d+$/', (string) $element['timeout'], '<redirect timeout> must be an integer.');
@@ -359,19 +381,39 @@ abstract class PackageInfoTestCase extends TestCase
 	private function validateCredits(\SimpleXMLElement $action): void
 	{
 		foreach ($action->credits as $element) {
-			$this->assertAllowedAttributes($element, [
-				'url',
-				'license',
-				'licenseurl',
-				'copyright',
-			], );
+			$this->assertAllowedAttributes($element, ['url', 'license', 'licenseurl', 'copyright']);
 
-			$this->assertRequiredAttributes($element, [
-				'url',
-				'license',
-				'licenseurl',
-				'copyright',
-			], );
+			$this->assertRequiredAttributes($element, ['url', 'license', 'licenseurl', 'copyright']);
+		}
+	}
+
+	private function validateLicense(\SimpleXMLElement $action, string $package_directory): void
+	{
+		foreach ($action->license as $element) {
+			$this->assertAllowedAttributes($element, ['lang', 'parsebbc', 'type']);
+
+			$this->assertAttributeValues($element, 'type', ['inline', 'file']);
+			$this->assertAttributeValues($element, 'parsebbc', ['true', 'false']);
+
+			if ((string) ($element['type'] ?? 'file') === 'file') {
+				$this->assertFileExists($package_directory . '/' . trim((string) $element));
+			}
+		}
+	}
+
+	private function validateRequires(\SimpleXMLElement $action): void
+	{
+		foreach ($action->requires as $element) {
+			$this->assertAllowedAttributes($element, ['id', 'version']);
+			$this->assertRequiredAttributes($element, ['id']);
+			$this->assertMatchesRegularExpression('/^[^:]+:[^:]+$/', (string) $element['id'], '<requires id="username:package-name" /> must follow the specified format.');
+		}
+	}
+
+	private function validateErrors(\SimpleXMLElement $action): void
+	{
+		foreach ($action->error as $element) {
+			$this->assertEmpty($element->attributes(), '<error> must not havve any attributes.');
 		}
 	}
 
